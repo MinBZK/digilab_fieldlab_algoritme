@@ -1,0 +1,108 @@
+{
+  "id": "RVA-001",
+  "algorithmName": "High Income Tax Calculation",
+  "registerLink": "regels.overheid.nl/RVA-001",
+  "dataModel": {
+    "objectTypes": [
+      {
+        "name": "Taxpayer",
+        "attributes": [
+          {
+            "name": "annualIncome",
+            "dataType": "Numeric"
+          },
+          {
+            "name": "taxAmount",
+            "dataType": "Numeric"
+          }
+        ],
+        "characteristics": [
+          "isHighIncome"
+        ]
+      }
+    ],
+    "parameters": [
+      {
+        "name": "standardDeduction",
+        "dataType": "Numeric"
+      },
+      {
+        "name": "taxRate",
+        "dataType": "Percentage"
+      }
+    ]
+  },
+  "ruleModel": {
+    "ruleGroups": [
+      {
+        "name": "IncomeTaxCalculation",
+        "rules": [
+          {
+            "name": "HighIncomeCharacteristic",
+            "type": "CharacteristicAssignment",
+            "validity": {
+              "startDate": "2024-01-01",
+              "endDate": "2024-12-31"
+            },
+            "content": {
+              "subject": {
+                "objectType": "Taxpayer"
+              },
+              "characteristic": "isHighIncome",
+              "condition": {
+                "operator": "greaterThan",
+                "leftOperand": {
+                  "objectType": "Taxpayer",
+                  "attribute": "annualIncome"
+                },
+                "rightOperand": {
+                  "value": 100000
+                }
+              }
+            }
+          },
+          {
+            "name": "TaxAmountCalculation",
+            "type": "Equality",
+            "validity": {
+              "startDate": "2024-01-01",
+              "endDate": "2024-12-31"
+            },
+            "content": {
+              "leftOperand": {
+                "objectType": "Taxpayer",
+                "attribute": "taxAmount"
+              },
+              "rightOperand": {
+                "operation": "multiplication",
+                "operands": [
+                  {
+                    "operation": "subtraction",
+                    "operands": [
+                      {
+                        "objectType": "Taxpayer",
+                        "attribute": "annualIncome"
+                      },
+                      {
+                        "parameter": "standardDeduction"
+                      }
+                    ]
+                  },
+                  {
+                    "parameter": "taxRate"
+                  }
+                ]
+              },
+              "condition": {
+                "subject": {
+                  "objectType": "Taxpayer"
+                },
+                "characteristic": "isHighIncome"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
